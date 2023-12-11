@@ -11,9 +11,22 @@ body {
   text-align: center;
 }
 
+.cart {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  /* flex-direction: column; */
+  /* width: 315px; */
+  margin: auto;
+}
+
 .cart-item {
   display: inline-flex;
   margin: 20px 10px;
+  border: 1px solid black;
+  padding: 10px;
+  /* width: 100%; */
+  width: 315px;
 }
 .cart-item .right-block {
   padding: 0 20px;

@@ -1,11 +1,13 @@
 import React from "react";
-import CartItem from "./CartItem";
-import TurmericPowder from "./Assets/Images/Turmeric.jpeg";
-import JeeraPowder from "./Assets/Images/Jeera.jpeg";
-import CorianderPowder from "./Assets/Images/Coriander.jpeg";
-import ChilliPowder from "./Assets/Images/Chilli.jpeg";
+import Cart from "./Cart";
+import Navbar from "./Navbar";
 
-class Cart extends React.Component {
+import TurmericPowder from "../Assets/Images/Turmeric.jpeg";
+import JeeraPowder from "../Assets/Images/Jeera.jpeg";
+import CorianderPowder from "../Assets/Images/Coriander.jpeg";
+import ChilliPowder from "../Assets/Images/Chilli.jpeg";
+
+class App extends React.Component {
   constructor() {
     super();
     this.state = {
@@ -63,30 +65,47 @@ class Cart extends React.Component {
 
   handleDelete = (id) => {
     let { products } = this.state;
-    products = products.filter((product) => product.id != id);
+    products = products.filter((product) => product.id !== id);
     this.setState({
       products,
     });
   };
 
-  render() {
+  getCartCount = () => {
     const { products } = this.state;
+    let count = 0
+    products.forEach((product) => {
+      count += product.qty
+    })
+    return count
+  };
+
+  getCartTotal = () => {
+    const { products } = this.state;
+    let totalAmount = 0
+    products.forEach((product) => {
+      totalAmount += product.qty * product.price
+    })
+    return totalAmount
+  }
+
+  render() {
     return (
-      <div className="cart-component">
-        {products.map((product) => {
-          return (
-            <CartItem
-              product={product}
-              key={product.id}
-              onIncreaseQuantity={this.handleIncreaseQuantity}
-              onDecreaseQuantity={this.handleDecreaseQuantity}
-              onDelete={this.handleDelete}
-            />
-          );
-        })}
+      <div className="App">
+        <header>
+          <h1 id="Heading">Uma Fresh</h1>
+          <Navbar count={this.getCartCount()} />
+        </header>
+        <Cart
+          products={this.state.products}
+          onIncreaseQuantity={this.handleIncreaseQuantity}
+          onDecreaseQuantity={this.handleDecreaseQuantity}
+          onDelete={this.handleDelete}
+        />
+         Total : {this.getCartTotal()}
       </div>
     );
   }
 }
 
-export default Cart;
+export default App;
