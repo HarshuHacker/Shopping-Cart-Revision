@@ -1,74 +1,68 @@
 import React from "react";
 import Cart from "./Cart";
 import Navbar from "./Navbar";
+import firebaseInfo from "../Assets/Files/firebaseConfig";
 
-import TurmericPowder from "../Assets/Images/Turmeric.jpeg";
-import JeeraPowder from "../Assets/Images/Jeera.jpeg";
-import CorianderPowder from "../Assets/Images/Coriander.jpeg";
-import ChilliPowder from "../Assets/Images/Chilli.jpeg";
+import {
+  getFirestore,
+  addDoc,
+  collection,
+  onSnapshot,
+  updateDoc,
+  doc,
+  deleteDoc,
+} from "firebase/firestore";
+
+const db = getFirestore(firebaseInfo);
+const citiesCol = collection(db, "products");
 
 class App extends React.Component {
   constructor() {
     super();
     this.state = {
-      products: [
-        {
-          id: 1,
-          price: 55,
-          title: "Haldi Powder",
-          qty: 1,
-          img: TurmericPowder,
-        },
-        {
-          id: 2,
-          price: 120,
-          title: "Jeera Powder",
-          qty: 1,
-          img: JeeraPowder,
-        },
-        {
-          id: 3,
-          price: 50,
-          title: "Dhaniya Powder",
-          qty: 1,
-          img: CorianderPowder,
-        },
-        {
-          id: 4,
-          price: 70,
-          title: "Chilli Powder",
-          qty: 1,
-          img: ChilliPowder,
-        },
-      ],
+      products: [],
+      loading: true,
     };
+  }
+
+  componentDidMount() {
+    console.log("Mount");
+    onSnapshot(citiesCol, (querySnapshot) => {
+      let temporaryArr = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        data["id"] = doc.id;
+        temporaryArr.push(data);
+      });
+      this.setState({
+        products: temporaryArr,
+        loading: false,
+      });
+    });
+    // this.addProducts()
   }
 
   handleIncreaseQuantity = (product) => {
     const { products } = this.state;
     const index = products.indexOf(product);
-    products[index].qty += 1;
-    this.setState({
-      products,
+
+    updateDoc(doc(citiesCol, products[index].id), {
+      qty: products[index].qty + 1,
     });
   };
 
   handleDecreaseQuantity = (product) => {
     const { products } = this.state;
     const index = products.indexOf(product);
-    products[index].qty =
-      products[index].qty > 0 ? products[index].qty - 1 : products[index].qty;
-    this.setState({
-      products,
+
+    updateDoc(doc(citiesCol, products[index].id), {
+      qty:
+        products[index].qty > 0 ? products[index].qty - 1 : products[index].qty,
     });
   };
 
   handleDelete = (id) => {
-    let { products } = this.state;
-    products = products.filter((product) => product.id !== id);
-    this.setState({
-      products,
-    });
+    deleteDoc(doc(citiesCol, id), {});
   };
 
   getCartCount = () => {
@@ -89,11 +83,20 @@ class App extends React.Component {
     return totalAmount;
   };
 
+  addProducts = () => {
+    addDoc(collection(db, "products"), {
+      title: "New Masala",
+      img: "fdfsfs",
+      price: 100,
+      qty: 1,
+    });
+  };
+
   render() {
     return (
       <div className="App">
         <header>
-          <h1 id="Heading">Uma Fresh</h1>
+          <h1 id="heading">Uma Fresh</h1>
           <Navbar count={this.getCartCount()} />
         </header>
         <Cart
@@ -103,6 +106,7 @@ class App extends React.Component {
           onDelete={this.handleDelete}
         />
         Total : {this.getCartTotal()}
+        {this.state.loading === true ? <p>Loading Products...</p> : <p></p>}
       </div>
     );
   }
